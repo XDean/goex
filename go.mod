@@ -1,4 +1,4 @@
-module github.com/XDean/goex
+module github.com/xdean/goex
 
 go 1.12
 
