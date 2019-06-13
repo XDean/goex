@@ -26,7 +26,7 @@ func structContain(prefix string, big interface{}, small interface{}) (ok bool, 
 		if small == nil && big == nil {
 			return true, ""
 		} else if small == nil {
-			return false, "Expect null but actual not"
+			return false, "Expect null but actual non-null"
 		} else {
 			return false, "Expect non-null but actual null"
 		}
