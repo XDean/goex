@@ -66,7 +66,7 @@ func ExampleStructContain2() {
 	// true <nil>
 	// true <nil>
 	// false Expect non-null but actual null
-	// false Expect null but actual not
+	// false Expect null but actual non-null
 	// false Expect '' (string) but '1' (int)
 }
 func ExampleStructContain3() {
