@@ -1,13 +1,14 @@
-package xconfig
+package xapp
 
 import (
 	"fmt"
+	"github.com/xdean/goex/xconfig"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
 )
 
 type (
-	Registry struct {
+	ConfigRegistry struct {
 		SecretKey        string
 		configNamespaces [][]string
 		configs          []interface{}
@@ -16,8 +17,8 @@ type (
 	}
 )
 
-func NewRegistry(secretKey string) *Registry {
-	return &Registry{
+func NewRegistry(secretKey string) *ConfigRegistry {
+	return &ConfigRegistry{
 		SecretKey:        secretKey,
 		configs:          []interface{}{},
 		configNamespaces: [][]string{},
@@ -26,12 +27,12 @@ func NewRegistry(secretKey string) *Registry {
 	}
 }
 
-func (c *Registry) Register(o interface{}, namespace ...string) {
+func (c *ConfigRegistry) Register(o interface{}, namespace ...string) {
 	c.configs = append(c.configs, o)
 	c.configNamespaces = append(c.configNamespaces, namespace)
 }
 
-func (c *Registry) Load(path string) (err error) {
+func (c *ConfigRegistry) Load(path string) (err error) {
 	defer func() { c.loaded = true }()
 
 	content, err := ioutil.ReadFile(path)
@@ -51,7 +52,7 @@ func (c *Registry) Load(path string) (err error) {
 	return
 }
 
-func (c *Registry) DoOnReady(f func()) {
+func (c *ConfigRegistry) DoOnReady(f func()) {
 	if c.loaded {
 		f()
 	} else {
@@ -59,7 +60,11 @@ func (c *Registry) DoOnReady(f func()) {
 	}
 }
 
-func (c *Registry) parseConfigs(rootNode *yaml.Node) error {
+func (c *ConfigRegistry) IsReady() bool {
+	return c.loaded
+}
+
+func (c *ConfigRegistry) parseConfigs(rootNode *yaml.Node) error {
 	for i, v := range c.configs {
 		node, err := getSubNode(rootNode, c.configNamespaces[i])
 		if err != nil {
@@ -69,7 +74,7 @@ func (c *Registry) parseConfigs(rootNode *yaml.Node) error {
 		if err != nil {
 			return err
 		} else if c.SecretKey != "" {
-			err = Decode(v, c.SecretKey)
+			err = xconfig.Decode(v, c.SecretKey)
 		}
 	}
 	return nil
