@@ -10,7 +10,9 @@ import (
 var key = "123456"
 
 func TestGenerate(t *testing.T) {
-	fmt.Println(EncryptString("data-here", "key-here"))
+	fmt.Println(EncryptString("a87fa5e7ca994364bd55b13c4f2f468f", "XDe@na8866999"))
+	key, err := Decrypt("ENC~UYghJPCbXTcbjzh+Y3kHenQ7+Nz6q10aN9yX53QI4LUnE9m33rthwHNsx6I+q+BNO8F0IBfTCKsAQkhV", "XDe@na8866999")
+	fmt.Println(key, err)
 }
 
 func TestDecrypt(t *testing.T) {
