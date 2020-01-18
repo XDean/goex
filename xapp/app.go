@@ -6,7 +6,7 @@ import (
 )
 
 type (
-	Runner struct {
+	App struct {
 		Config ConfigRegistry
 		inits  []InitTask
 		mains  []MainTask
@@ -18,7 +18,7 @@ type (
 	MainTask func()
 )
 
-func (a *Runner) RegisterInitFunc(f func()) {
+func (a *App) RegisterInitFunc(f func()) {
 	a.inits = append(a.inits, InitTask{
 		Ready: func() bool {
 			return true
@@ -27,15 +27,15 @@ func (a *Runner) RegisterInitFunc(f func()) {
 	})
 }
 
-func (a *Runner) RegisterInit(f InitTask) {
+func (a *App) RegisterInit(f InitTask) {
 	a.inits = append(a.inits, f)
 }
 
-func (a *Runner) RegisterRun(f func()) {
+func (a *App) RegisterRun(f func()) {
 	a.mains = append(a.mains, f)
 }
 
-func (a *Runner) RegisterConfigPath(path string) {
+func (a *App) RegisterConfigPath(path string) {
 	a.RegisterInitFunc(func() {
 		err := a.Config.Load(path)
 		if err != nil {
@@ -44,12 +44,12 @@ func (a *Runner) RegisterConfigPath(path string) {
 	})
 }
 
-func (a *Runner) Run() {
+func (a *App) Run() {
 	a.runInits()
 	a.runMains()
 }
 
-func (a *Runner) runInits() {
+func (a *App) runInits() {
 	tasks := make(map[int]InitTask, len(a.inits))
 	for k, v := range a.inits {
 		tasks[k] = v
@@ -68,7 +68,7 @@ func (a *Runner) runInits() {
 	}
 }
 
-func (a *Runner) runMains() {
+func (a *App) runMains() {
 	wg := sync.WaitGroup{}
 	for _, v := range a.mains {
 		wg.Add(1)
