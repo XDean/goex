@@ -52,6 +52,42 @@ func Decode(obj interface{}, key string) error {
 	return nil
 }
 
+func Encode(obj interface{}, key string) error {
+	var v reflect.Value
+	if ov, ok := obj.(reflect.Value); ok {
+		v = ov
+	} else {
+		v = reflect.ValueOf(obj)
+	}
+	switch v.Kind() {
+	case reflect.Ptr:
+		return Encode(v.Elem(), key)
+	case reflect.String:
+		str := v.String()
+		if v.CanSet() { //&& strings.HasPrefix(str, "ENC~")
+			text := Encrypt([]byte(str), key)
+			v.SetString("ENC~" + string(text))
+		}
+	case reflect.Struct:
+		for i := 0; i < v.NumField(); i++ {
+			field := v.Field(i)
+			if err := Encode(field, key); err != nil {
+				return err
+			}
+		}
+	case reflect.Slice | reflect.Array:
+		l := v.Len()
+		for i := 0; i < l; i++ {
+			if err := Encode(v.Index(i), key); err != nil {
+				return err
+			}
+		}
+	case reflect.Interface:
+		return Encode(v.Interface(), key)
+	}
+	return nil
+}
+
 func Encrypt(data []byte, passphrase string) string {
 	block, err := aes.NewCipher([]byte(createHash(passphrase)))
 	if err != nil {
